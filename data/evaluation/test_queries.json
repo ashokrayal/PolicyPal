@@ -1,0 +1,203 @@
+{
+  "timestamp": "2025-06-28T17:01:44.534349",
+  "queries": [
+    {
+      "query": "How many days of leave am I entitled to?",
+      "relevant_docs": [
+        "leave_policy.pdf"
+      ],
+      "category": "leave",
+      "difficulty": "easy",
+      "description": "Basic leave entitlement question"
+    },
+    {
+      "query": "What is the notice period for leave requests?",
+      "relevant_docs": [
+        "leave_policy.pdf"
+      ],
+      "category": "leave",
+      "difficulty": "easy",
+      "description": "Leave notice period question"
+    },
+    {
+      "query": "Can I carry over unused leave to next year?",
+      "relevant_docs": [
+        "leave_policy.pdf"
+      ],
+      "category": "leave",
+      "difficulty": "medium",
+      "description": "Leave carryover policy"
+    },
+    {
+      "query": "What health insurance coverage do I have?",
+      "relevant_docs": [
+        "benefits_guide.pdf"
+      ],
+      "category": "benefits",
+      "difficulty": "easy",
+      "description": "Basic health insurance question"
+    },
+    {
+      "query": "How much do I pay for health insurance premiums?",
+      "relevant_docs": [
+        "benefits_guide.pdf"
+      ],
+      "category": "benefits",
+      "difficulty": "medium",
+      "description": "Premium cost question"
+    },
+    {
+      "query": "Does health insurance cover dental and vision?",
+      "relevant_docs": [
+        "benefits_guide.pdf"
+      ],
+      "category": "benefits",
+      "difficulty": "medium",
+      "description": "Dental and vision coverage"
+    },
+    {
+      "query": "Can I work from home?",
+      "relevant_docs": [
+        "remote_work_policy.pdf"
+      ],
+      "category": "remote_work",
+      "difficulty": "easy",
+      "description": "Basic remote work question"
+    },
+    {
+      "query": "How many days per week can I work remotely?",
+      "relevant_docs": [
+        "remote_work_policy.pdf"
+      ],
+      "category": "remote_work",
+      "difficulty": "easy",
+      "description": "Remote work frequency"
+    },
+    {
+      "query": "What are the requirements for remote work?",
+      "relevant_docs": [
+        "remote_work_policy.pdf"
+      ],
+      "category": "remote_work",
+      "difficulty": "medium",
+      "description": "Remote work requirements"
+    },
+    {
+      "query": "What is the dress code policy?",
+      "relevant_docs": [
+        "dress_code.pdf"
+      ],
+      "category": "dress_code",
+      "difficulty": "easy",
+      "description": "Basic dress code question"
+    },
+    {
+      "query": "Can I wear jeans on Friday?",
+      "relevant_docs": [
+        "dress_code.pdf"
+      ],
+      "category": "dress_code",
+      "difficulty": "easy",
+      "description": "Casual Friday policy"
+    },
+    {
+      "query": "What should I wear for client meetings?",
+      "relevant_docs": [
+        "dress_code.pdf"
+      ],
+      "category": "dress_code",
+      "difficulty": "medium",
+      "description": "Client meeting attire"
+    },
+    {
+      "query": "How do I submit expense reports?",
+      "relevant_docs": [
+        "expense_policy.pdf"
+      ],
+      "category": "expenses",
+      "difficulty": "easy",
+      "description": "Expense submission process"
+    },
+    {
+      "query": "What receipts do I need for expenses?",
+      "relevant_docs": [
+        "expense_policy.pdf"
+      ],
+      "category": "expenses",
+      "difficulty": "medium",
+      "description": "Receipt requirements"
+    },
+    {
+      "query": "How long does expense reimbursement take?",
+      "relevant_docs": [
+        "expense_policy.pdf"
+      ],
+      "category": "expenses",
+      "difficulty": "medium",
+      "description": "Reimbursement timeline"
+    },
+    {
+      "query": "What are my benefits and leave policies?",
+      "relevant_docs": [
+        "benefits_guide.pdf",
+        "leave_policy.pdf"
+      ],
+      "category": "multi_topic",
+      "difficulty": "hard",
+      "description": "Multi-topic benefits and leave question"
+    },
+    {
+      "query": "What policies apply to remote work and expenses?",
+      "relevant_docs": [
+        "remote_work_policy.pdf",
+        "expense_policy.pdf"
+      ],
+      "category": "multi_topic",
+      "difficulty": "hard",
+      "description": "Remote work and expense policies"
+    },
+    {
+      "query": "What happens if I don't follow the dress code?",
+      "relevant_docs": [
+        "dress_code.pdf"
+      ],
+      "category": "compliance",
+      "difficulty": "hard",
+      "description": "Policy violation consequences"
+    },
+    {
+      "query": "Are there any exceptions to the leave policy?",
+      "relevant_docs": [
+        "leave_policy.pdf"
+      ],
+      "category": "leave",
+      "difficulty": "hard",
+      "description": "Policy exceptions"
+    }
+  ],
+  "statistics": {
+    "total_queries": 19,
+    "categories": {
+      "leave": 4,
+      "benefits": 3,
+      "remote_work": 3,
+      "dress_code": 3,
+      "expenses": 3,
+      "multi_topic": 2,
+      "compliance": 1
+    },
+    "difficulties": {
+      "easy": 8,
+      "medium": 7,
+      "hard": 4
+    },
+    "unique_documents": 5,
+    "documents": [
+      "remote_work_policy.pdf",
+      "leave_policy.pdf",
+      "dress_code.pdf",
+      "expense_policy.pdf",
+      "benefits_guide.pdf"
+    ]
+  }
+}

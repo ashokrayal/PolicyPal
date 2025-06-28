@@ -15,9 +15,9 @@ class HybridRetriever:
         faiss_results = self.faiss_retriever.search(query_embedding, top_k=top_k)
         bm25_results = self.bm25_retriever.search(query_text, top_k=top_k)
 
-        # Build a dict for fast lookup
-        faiss_dict = {r['file_path']: r for r in faiss_results if 'file_path' in r}
-        bm25_dict = {r['file_path']: r for r in bm25_results if 'file_path' in r}
+        # Build a dict for fast lookup using 'source' as the key
+        faiss_dict = {r['source']: r for r in faiss_results if 'source' in r}
+        bm25_dict = {r['source']: r for r in bm25_results if 'source' in r}
         all_keys = set(faiss_dict.keys()) | set(bm25_dict.keys())
 
         hybrid_results = []
