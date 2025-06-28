@@ -1,0 +1,134 @@
+# PolicyPal Configuration File
+# This file contains all configuration settings for the PolicyPal application
+
+# Embedding Configuration
+embedding:
+  model: "all-MiniLM-L6-v2"  # SentenceTransformer model for embeddings
+  batch_size: 32             # Batch size for embedding generation
+  max_length: 512            # Maximum sequence length
+  device: "cpu"              # Device to use (cpu/cuda)
+  normalize: true            # Whether to normalize embeddings
+
+# Retrieval Configuration
+retrieval:
+  faiss_weight: 0.7          # Weight for FAISS semantic search
+  bm25_weight: 0.3           # Weight for BM25 keyword search
+  top_k: 5                   # Number of top results to retrieve
+  similarity_threshold: 0.5   # Minimum similarity score
+  max_results: 10            # Maximum number of results to return
+
+# Chunking Configuration
+chunking:
+  chunk_size: 1000           # Size of text chunks in characters
+  chunk_overlap: 200         # Overlap between chunks in characters
+  separator: "\n\n"          # Separator for text splitting
+  min_chunk_size: 100        # Minimum chunk size
+
+# Document Processing
+document_processing:
+  supported_formats: ["pdf", "docx", "csv", "txt"]
+  ocr_enabled: true          # Enable OCR for scanned PDFs
+  ocr_language: "eng"        # OCR language
+  image_dpi: 300             # DPI for image processing
+  max_file_size: 50          # Maximum file size in MB
+
+# Safety and Moderation
+safety:
+  enable_moderation: true    # Enable content moderation
+  sensitive_patterns:        # Regex patterns for sensitive content
+    - "password"
+    - "ssn|social.*security"
+    - "credit.*card"
+    - "phone.*number"
+  fallback_message: "I couldn't find relevant information for your query."
+  max_query_length: 1000     # Maximum query length
+  profanity_filter: true     # Enable profanity filtering
+
+# Conversation Configuration
+conversation:
+  memory_size: 10            # Number of conversation turns to remember
+  max_tokens: 2000           # Maximum tokens in response
+  temperature: 0.7           # Response creativity (0.0-1.0)
+  include_sources: true      # Include source citations in responses
+  conversation_timeout: 3600 # Conversation timeout in seconds
+
+# Logging Configuration
+logging:
+  level: "INFO"              # Log level (DEBUG, INFO, WARNING, ERROR)
+  file_path: "data/logs/policypal.log"
+  rotation: "10 MB"          # Log rotation size
+  retention: "30 days"       # Log retention period
+  format: "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+
+# Performance Configuration
+performance:
+  cache_enabled: true        # Enable caching
+  cache_size: 1000           # Cache size in MB
+  parallel_processing: true  # Enable parallel processing
+  max_workers: 4             # Maximum number of worker processes
+
+# UI Configuration
+ui:
+  title: "PolicyPal - Enterprise RAG Chatbot"
+  theme: "light"             # UI theme (light/dark)
+  sidebar_title: "PolicyPal"
+  max_upload_size: 50        # Maximum upload size in MB
+  show_source_documents: true # Show source documents in UI
+  enable_feedback: true      # Enable user feedback system
+
+# API Configuration (if using FastAPI)
+api:
+  host: "0.0.0.0"           # API host
+  port: 8000                # API port
+  debug: false              # Debug mode
+  cors_origins: ["*"]       # CORS origins
+  rate_limit: 100           # Requests per minute
+  timeout: 30               # Request timeout in seconds
+
+# Data Storage
+storage:
+  data_dir: "data"          # Data directory
+  documents_dir: "data/documents"
+  embeddings_dir: "data/embeddings"
+  logs_dir: "data/logs"
+  feedback_dir: "data/feedback"
+  cache_dir: "data/cache"
+
+# Evaluation Configuration
+evaluation:
+  test_queries_file: "data/evaluation/test_queries.json"
+  metrics: ["recall@5", "precision@5", "f1@5"]
+  evaluation_runs: 3        # Number of evaluation runs
+  save_results: true        # Save evaluation results
+
+# External Services (Optional)
+external_services:
+  openai:
+    enabled: false          # Enable OpenAI integration
+    model: "gpt-3.5-turbo"  # OpenAI model
+    max_tokens: 1000        # Maximum tokens
+  anthropic:
+    enabled: false          # Enable Anthropic integration
+    model: "claude-3-sonnet-20240229"  # Anthropic model
+    max_tokens: 1000        # Maximum tokens
+
+# Security Configuration
+security:
+  secret_key: "your-secret-key-here"  # Change this in production
+  jwt_secret: "your-jwt-secret-here"  # Change this in production
+  session_timeout: 3600     # Session timeout in seconds
+  max_login_attempts: 5     # Maximum login attempts
+
+# Monitoring and Analytics
+monitoring:
+  enable_metrics: true      # Enable performance metrics
+  metrics_interval: 60      # Metrics collection interval in seconds
+  enable_health_checks: true # Enable health checks
+  health_check_interval: 30 # Health check interval in seconds
+
+# Development Configuration
+development:
+  debug_mode: false         # Enable debug mode
+  hot_reload: true          # Enable hot reload
+  auto_format: true         # Auto-format code
+  lint_on_save: true        # Lint code on save 
