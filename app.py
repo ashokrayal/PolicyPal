@@ -23,6 +23,7 @@ from src.retrieval.bm25_retriever import BM25Retriever
 from src.retrieval.hybrid_retriever import HybridRetriever
 from src.conversation.conversational_chain import ConversationalChain
 from ui.components.chat_interface import display_chat_interface
+from src.ingestion.text_chunker import TextChunker
 
 # Set up logging
 logging.basicConfig(
@@ -310,31 +311,46 @@ def setup_demo_data(components):
         # Load sample documents
         sample_docs = load_sample_documents()
         logging.info(f"Loaded {len(sample_docs)} sample documents.")
-        
-        # Generate embeddings for sample documents
-        texts = [doc["content"] for doc in sample_docs]
+
+        # Initialize chunker
+        chunker = TextChunker()
+        chunked_docs = []
+        for doc in sample_docs:
+            # Chunk each document
+            chunks_info = chunker.create_chunks(doc["content"], doc["file_name"])
+            for chunk in chunks_info:
+                chunked_doc = {
+                    "content": chunk["content"],
+                    "source": chunk["source"],
+                    "file_name": doc["file_name"],
+                    "chunk_id": chunk["chunk_id"]
+                }
+                chunked_docs.append(chunked_doc)
+        logging.info(f"Chunked into {len(chunked_docs)} total chunks.")
+
+        # Generate embeddings for chunked documents
+        texts = [doc["content"] for doc in chunked_docs]
         embeddings = components["embedding_generator"].embed_texts(texts)
-        logging.info(f"Generated embeddings for {len(texts)} documents.")
-        
+        logging.info(f"Generated embeddings for {len(texts)} chunks.")
+
         # Add to vector store
-        for i, (doc, embedding) in enumerate(zip(sample_docs, embeddings)):
-            doc["chunk_id"] = f"chunk_{i}"
+        for i, (doc, embedding) in enumerate(zip(chunked_docs, embeddings)):
             components["vector_store"].add(embedding.reshape(1, -1), [doc])
-        logging.info("Added documents to FAISSVectorStore.")
-        
-        # Create new BM25 retriever with the documents
-        documents = [doc["content"] for doc in sample_docs]
-        metadatas = [doc for doc in sample_docs]
+        logging.info("Added chunks to FAISSVectorStore.")
+
+        # Create new BM25 retriever with the chunked documents
+        documents = [doc["content"] for doc in chunked_docs]
+        metadatas = [doc for doc in chunked_docs]
         components["bm25_retriever"].add_documents(documents, metadatas)
-        logging.info("BM25Retriever updated with sample documents.")
-        
+        logging.info("BM25Retriever updated with chunked documents.")
+
         # Update hybrid retriever with new BM25 retriever
         components["hybrid_retriever"] = HybridRetriever(
             faiss_retriever=components["vector_store"],
             bm25_retriever=components["bm25_retriever"]
         )
         logging.info("HybridRetriever updated.")
-        
+
         # Update conversational chain with new hybrid retriever
         components["conversational_chain"] = ConversationalChain(
             hybrid_retriever=components["hybrid_retriever"],
@@ -343,7 +359,7 @@ def setup_demo_data(components):
             max_history=20
         )
         logging.info("ConversationalChain updated.")
-        
+
         st.success("✅ Demo data loaded successfully!")
         return True
         
