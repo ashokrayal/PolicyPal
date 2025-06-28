@@ -10,12 +10,13 @@ from pathlib import Path
 from langchain.llms.base import LLM
 from langchain_core.language_models.llms import BaseLLM
 from langchain_core.outputs import LLMResult
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict
 import logging
 import traceback
 import time
 import psutil
 import pandas as pd
+from datetime import datetime
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
@@ -33,6 +34,11 @@ from src.embeddings.performance_monitor import PerformanceMonitor
 from src.retrieval.text_preprocessor import RetrievalTextPreprocessor
 from src.safety.safety_manager import safety_manager
 from src.conversation.prompt_templates import prompt_manager
+from src.ingestion.pipeline import DocumentProcessingPipeline
+from src.conversation.memory_manager import MemoryManager
+from src.conversation.prompt_templates import PromptManager
+from src.safety.safety_manager import SafetyManager
+from src.embeddings.cache_manager import EmbeddingCache
 
 # Set up logging
 # Remove any existing handlers
@@ -339,6 +345,30 @@ def initialize_components():
         )
         logging.info("ConversationalChain initialized.")
         
+        # Initialize memory manager
+        from src.conversation.memory_manager import MemoryManager
+        memory_manager = MemoryManager()
+        logging.info("MemoryManager initialized.")
+        
+        # Initialize prompt manager
+        from src.conversation.prompt_templates import PromptManager
+        prompt_manager = PromptManager()
+        logging.info("PromptManager initialized.")
+        
+        # Initialize safety manager
+        from src.safety.safety_manager import SafetyManager
+        safety_manager = SafetyManager()
+        logging.info("SafetyManager initialized.")
+        
+        # Initialize embedding cache manager
+        from src.embeddings.cache_manager import EmbeddingCache
+        embedding_cache_manager = EmbeddingCache()
+        logging.info("EmbeddingCache initialized.")
+        
+        # Initialize ingestion pipeline
+        ingestion_pipeline = DocumentProcessingPipeline()
+        logging.info("DocumentProcessingPipeline initialized.")
+        
         return {
             "embedding_generator": embedding_generator,
             "embedding_optimizer": embedding_optimizer,
@@ -349,8 +379,10 @@ def initialize_components():
             "performance_monitor": performance_monitor,
             "text_preprocessor": text_preprocessor,
             "embedding_cache": embedding_cache,
+            "embedding_cache_manager": embedding_cache_manager,
             "safety_manager": safety_manager,
-            "prompt_manager": prompt_manager
+            "prompt_manager": prompt_manager,
+            "memory_manager": memory_manager
         }
         
     except Exception as e:
@@ -852,6 +884,45 @@ def main():
         text-align: center;
         margin-bottom: 2rem;
     }
+    .chat-message {
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 0.5rem 0;
+        border-left: 4px solid;
+    }
+    .user-message {
+        background-color: #e3f2fd;
+        border-left-color: #2196f3;
+    }
+    .assistant-message {
+        background-color: #f3e5f5;
+        border-left-color: #9c27b0;
+    }
+    .source-citation {
+        background-color: #fff3e0;
+        border: 1px solid #ff9800;
+        border-radius: 5px;
+        padding: 0.5rem;
+        margin: 0.5rem 0;
+        font-size: 0.9rem;
+    }
+    .metric-card {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+    }
+    .status-indicator {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 8px;
+    }
+    .status-green { background-color: #28a745; }
+    .status-yellow { background-color: #ffc107; }
+    .status-red { background-color: #dc3545; }
     </style>
     """, unsafe_allow_html=True)
     
