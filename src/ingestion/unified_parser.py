@@ -5,6 +5,7 @@ from .document_parser import DocumentParser
 from .pdf_parser import PDFParser
 from .docx_parser import DOCXParser
 from .csv_parser import CSVParser
+from .text_parser import TextParser
 
 class UnifiedDocumentParser:
     """
@@ -17,6 +18,7 @@ class UnifiedDocumentParser:
             '.pdf': PDFParser(),
             '.docx': DOCXParser(),
             '.csv': CSVParser(),
+            '.txt': TextParser(),
         }
     
     def get_file_extension(self, file_path: str) -> str:

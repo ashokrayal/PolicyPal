@@ -36,8 +36,10 @@ logging.basicConfig(
 class MockLLM(BaseLLM):
     """Mock LLM for demonstration purposes that works with LangChain."""
     
-    def _call(self, prompt: str, stop: Optional[List[str]] = None, **kwargs) -> str:
+    def _call(self, prompt: str, stop=None, **kwargs) -> str:
         """Generate a mock response."""
+        logger = logging.getLogger(__name__)
+        
         # Extract the user's question from the prompt
         question_start = prompt.find("Question:")
         if question_start != -1:
@@ -45,8 +47,8 @@ class MockLLM(BaseLLM):
         else:
             question = prompt
         
-        print(f"DEBUG - Full prompt: {prompt[:200]}...")
-        print(f"DEBUG - Extracted question: {question}")
+        logger.info(f"MockLLM - Full prompt: {prompt[:200]}...")
+        logger.info(f"MockLLM - Extracted question: {question}")
         
         # Check if there's context in the prompt
         if "Context:" in prompt:
@@ -58,7 +60,7 @@ class MockLLM(BaseLLM):
                 
                 # First check the user's question for keywords, then fall back to context
                 if "leave" in question.lower() or "leave" in context.lower():
-                    return """Based on the company policy documents, here's what I found about leave policies:
+                    response = """Based on the company policy documents, here's what I found about leave policies:
 
 Employees are entitled to 20 days of paid leave per year. Leave requests must be submitted at least 2 weeks in advance to allow for proper planning and coverage.
 
@@ -69,9 +71,11 @@ Key points:
 - Unused leave may be carried over to the next year (up to 5 days)
 
 This policy ensures fair treatment for all employees while maintaining operational efficiency."""
+                    logger.info(f"MockLLM - Generated leave policy response: {response[:100]}...")
+                    return response
                 
                 elif "benefits" in question.lower() or "health" in question.lower() or "benefits" in context.lower():
-                    return """Based on the company policy documents, here's what I found about health benefits:
+                    response = """Based on the company policy documents, here's what I found about health benefits:
 
 The company provides comprehensive health insurance including dental and vision coverage. Premiums are shared 80/20 with the company covering 80% of the cost.
 
@@ -84,9 +88,11 @@ Key benefits include:
 - Prescription drug coverage
 
 This comprehensive benefits package demonstrates our commitment to employee well-being."""
+                    logger.info(f"MockLLM - Generated health benefits response: {response[:100]}...")
+                    return response
                 
                 elif "remote" in question.lower() or "work from home" in question.lower() or "remote" in context.lower():
-                    return """Based on the company policy documents, here's what I found about remote work policies:
+                    response = """Based on the company policy documents, here's what I found about remote work policies:
 
 Employees may work remotely up to 3 days per week. Remote work requires manager approval and stable internet connection.
 
@@ -98,9 +104,11 @@ Key requirements:
 - Regular check-ins with manager required
 
 This policy provides flexibility while maintaining team collaboration and productivity."""
+                    logger.info(f"MockLLM - Generated remote work response: {response[:100]}...")
+                    return response
                 
                 elif "dress" in question.lower() or "attire" in question.lower() or "dress" in context.lower():
-                    return """Based on the company policy documents, here's what I found about dress code policies:
+                    response = """Based on the company policy documents, here's what I found about dress code policies:
 
 Business casual attire is required Monday through Thursday. Casual Friday is permitted. No jeans or t-shirts on client meeting days.
 
@@ -112,9 +120,11 @@ Dress code guidelines:
 - Company logo wear encouraged
 
 This policy maintains a professional image while allowing some flexibility."""
+                    logger.info(f"MockLLM - Generated dress code response: {response[:100]}...")
+                    return response
                 
                 elif "expense" in question.lower() or "reimbursement" in question.lower() or "expense" in context.lower():
-                    return """Based on the company policy documents, here's what I found about expense reimbursement:
+                    response = """Based on the company policy documents, here's what I found about expense reimbursement:
 
 All business expenses must be submitted within 30 days. Receipts are required for amounts over $25. Travel expenses need pre-approval.
 
@@ -126,17 +136,21 @@ Expense policy details:
 - Reimbursement processed within 2 weeks
 
 This policy ensures proper financial controls and timely reimbursement."""
+                    logger.info(f"MockLLM - Generated expense policy response: {response[:100]}...")
+                    return response
                 
                 else:
-                    return """Based on the company policy documents, I found relevant information that addresses your question. 
+                    response = """Based on the company policy documents, I found relevant information that addresses your question. 
 
 The policy documents contain comprehensive guidelines covering various aspects of employment including leave policies, benefits, remote work arrangements, dress code, and expense reimbursement procedures.
 
 If you have a specific question about any of these areas, I'd be happy to provide more detailed information. You can also refer to the source documents listed below for complete policy details."""
+                    logger.info(f"MockLLM - Generated general response: {response[:100]}...")
+                    return response
             else:
                 # Fallback: check the question directly for keywords
                 if "leave" in question.lower():
-                    return """Based on the company policy documents, here's what I found about leave policies:
+                    response = """Based on the company policy documents, here's what I found about leave policies:
 
 Employees are entitled to 20 days of paid leave per year. Leave requests must be submitted at least 2 weeks in advance to allow for proper planning and coverage.
 
@@ -147,8 +161,10 @@ Key points:
 - Unused leave may be carried over to the next year (up to 5 days)
 
 This policy ensures fair treatment for all employees while maintaining operational efficiency."""
+                    logger.info(f"MockLLM - Generated leave policy response (fallback): {response[:100]}...")
+                    return response
                 elif "benefits" in question.lower() or "health" in question.lower():
-                    return """Based on the company policy documents, here's what I found about health benefits:
+                    response = """Based on the company policy documents, here's what I found about health benefits:
 
 The company provides comprehensive health insurance including dental and vision coverage. Premiums are shared 80/20 with the company covering 80% of the cost.
 
@@ -161,8 +177,10 @@ Key benefits include:
 - Prescription drug coverage
 
 This comprehensive benefits package demonstrates our commitment to employee well-being."""
+                    logger.info(f"MockLLM - Generated health benefits response (fallback): {response[:100]}...")
+                    return response
                 elif "remote" in question.lower() or "work from home" in question.lower():
-                    return """Based on the company policy documents, here's what I found about remote work policies:
+                    response = """Based on the company policy documents, here's what I found about remote work policies:
 
 Employees may work remotely up to 3 days per week. Remote work requires manager approval and stable internet connection.
 
@@ -174,8 +192,10 @@ Key requirements:
 - Regular check-ins with manager required
 
 This policy provides flexibility while maintaining team collaboration and productivity."""
+                    logger.info(f"MockLLM - Generated remote work response (fallback): {response[:100]}...")
+                    return response
                 elif "dress" in question.lower() or "attire" in question.lower():
-                    return """Based on the company policy documents, here's what I found about dress code policies:
+                    response = """Based on the company policy documents, here's what I found about dress code policies:
 
 Business casual attire is required Monday through Thursday. Casual Friday is permitted. No jeans or t-shirts on client meeting days.
 
@@ -187,8 +207,10 @@ Dress code guidelines:
 - Company logo wear encouraged
 
 This policy maintains a professional image while allowing some flexibility."""
+                    logger.info(f"MockLLM - Generated dress code response (fallback): {response[:100]}...")
+                    return response
                 elif "expense" in question.lower() or "reimbursement" in question.lower():
-                    return """Based on the company policy documents, here's what I found about expense reimbursement:
+                    response = """Based on the company policy documents, here's what I found about expense reimbursement:
 
 All business expenses must be submitted within 30 days. Receipts are required for amounts over $25. Travel expenses need pre-approval.
 
@@ -200,16 +222,22 @@ Expense policy details:
 - Reimbursement processed within 2 weeks
 
 This policy ensures proper financial controls and timely reimbursement."""
+                    logger.info(f"MockLLM - Generated expense policy response (fallback): {response[:100]}...")
+                    return response
                 else:
-                    return "I found some relevant information in the policy documents. Let me summarize what I know about your question..."
+                    response = "I found some relevant information in the policy documents. Let me summarize what I know about your question..."
+                    logger.info(f"MockLLM - Generated fallback response: {response}")
+                    return response
         else:
-            return "I found some relevant information in the policy documents. Let me summarize what I know..."
+            response = "I found some relevant information in the policy documents. Let me summarize what I know..."
+            logger.info(f"MockLLM - Generated no-context response: {response}")
+            return response
     
     @property
     def _llm_type(self) -> str:
         return "mock"
     
-    def _generate(self, prompts: List[str], stop: Optional[List[str]] = None, **kwargs) -> LLMResult:
+    def _generate(self, prompts, stop=None, **kwargs):
         """Generate responses for multiple prompts."""
         generations = []
         for prompt in prompts:

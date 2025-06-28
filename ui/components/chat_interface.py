@@ -248,6 +248,6 @@ def display_chat_interface(conversational_chain):
                 # Clear processing state
                 st.session_state.processing = False
     
-    # Auto-rerun to update the display
-    if st.session_state.messages:
-        st.rerun() 
+    # Remove auto-rerun to prevent UI issues
+    # if st.session_state.messages:
+    #     st.rerun() 

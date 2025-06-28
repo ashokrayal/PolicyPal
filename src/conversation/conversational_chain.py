@@ -138,13 +138,21 @@ Answer:"""
         Returns:
             Dictionary containing response and metadata
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         try:
+            logger.info(f"Processing user message: {user_message[:100]}...")
+            
             # Get response from LangChain using invoke method
             result = self.chain.invoke({"question": user_message})
             
             # Extract response and source documents
             response = result.get("answer", "I'm sorry, I couldn't generate a response.")
             source_documents = result.get("source_documents", [])
+            
+            logger.info(f"Generated response: {response[:100]}...")
+            logger.info(f"Found {len(source_documents)} source documents")
             
             # Extract source information
             sources = []
@@ -170,6 +178,8 @@ Answer:"""
                 sources=sources
             )
             
+            logger.info(f"Successfully processed message. Response length: {len(response)}")
+            
             return {
                 "response": response,
                 "sources": sources,
@@ -179,6 +189,7 @@ Answer:"""
             }
             
         except Exception as e:
+            logger.error(f"Error processing message: {str(e)}", exc_info=True)
             error_response = f"I encountered an error while processing your request: {str(e)}"
             
             # Add error turn to memory
