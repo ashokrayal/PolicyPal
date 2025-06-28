@@ -220,6 +220,10 @@ def display_chat_interface(conversational_chain):
                         for i, source in enumerate(result["sources"], 1):
                             st.markdown(f"{i}. {source}")
                     
+                    # Display performance metrics
+                    if result.get("search_latency"):
+                        st.markdown(f"**⚡ Performance:** Search completed in {result['search_latency']:.3f}s")
+                    
                     # Add assistant message to session
                     add_assistant_message(
                         result["response"],

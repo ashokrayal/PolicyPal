@@ -3,7 +3,7 @@ Conversational AI chain for PolicyPal.
 Integrates retrieval, memory, and response generation.
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from langchain.chains import ConversationalRetrievalChain
 from langchain.llms.base import LLM
 from langchain.schema import BaseRetriever, Document
@@ -14,6 +14,7 @@ from pydantic import Field
 from .memory_manager import MemoryManager
 from ..retrieval.hybrid_retriever import HybridRetriever
 from ..embeddings.embedding_generator import EmbeddingGenerator
+from ..embeddings.optimizer import EmbeddingOptimizer
 
 
 class PolicyPalRetriever(BaseRetriever):
@@ -22,7 +23,7 @@ class PolicyPalRetriever(BaseRetriever):
     """
     
     hybrid_retriever: HybridRetriever = Field(description="The hybrid retriever instance")
-    embedding_generator: EmbeddingGenerator = Field(description="The embedding generator instance")
+    embedding_generator: Union[EmbeddingGenerator, EmbeddingOptimizer] = Field(description="The embedding generator or optimizer instance")
     
     def _get_relevant_documents(self, query: str) -> List[Document]:
         """
@@ -71,7 +72,7 @@ class ConversationalChain:
     
     def __init__(self, 
                  hybrid_retriever: HybridRetriever,
-                 embedding_generator: EmbeddingGenerator,
+                 embedding_generator: Union[EmbeddingGenerator, EmbeddingOptimizer],
                  llm: Any,
                  memory_manager: Optional[MemoryManager] = None,
                  max_history: int = 10):
@@ -139,13 +140,21 @@ Answer:"""
             Dictionary containing response and metadata
         """
         import logging
+        import time
         logger = logging.getLogger(__name__)
         
         try:
             logger.info(f"Processing user message: {user_message[:100]}...")
             
+            # Time the search operation
+            search_start_time = time.time()
+            
             # Get response from LangChain using invoke method
             result = self.chain.invoke({"question": user_message})
+            
+            # Log search latency if we have access to performance monitor
+            search_elapsed = time.time() - search_start_time
+            logger.info(f"Search completed in {search_elapsed:.3f}s")
             
             # Extract response and source documents
             response = result.get("answer", "I'm sorry, I couldn't generate a response.")
@@ -185,6 +194,7 @@ Answer:"""
                 "sources": sources,
                 "retrieved_documents": retrieved_docs,
                 "retrieval_scores": retrieval_scores,
+                "search_latency": search_elapsed,
                 "success": True
             }
             
@@ -206,6 +216,7 @@ Answer:"""
                 "sources": [],
                 "retrieved_documents": [],
                 "retrieval_scores": [],
+                "search_latency": 0.0,
                 "success": False,
                 "error": str(e)
             }

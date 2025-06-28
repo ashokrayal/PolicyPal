@@ -68,7 +68,7 @@ class TestAllParsers(unittest.TestCase):
         self.assertTrue(self.unified_parser.is_supported_format("test.pdf"))
         self.assertTrue(self.unified_parser.is_supported_format("test.docx"))
         self.assertTrue(self.unified_parser.is_supported_format("test.csv"))
-        self.assertFalse(self.unified_parser.is_supported_format("test.txt"))
+        self.assertTrue(self.unified_parser.is_supported_format("test.txt"))
         self.assertFalse(self.unified_parser.is_supported_format("test.xlsx"))
     
     def test_unified_parser_get_extension(self):
@@ -76,6 +76,7 @@ class TestAllParsers(unittest.TestCase):
         self.assertEqual(self.unified_parser.get_file_extension("test.pdf"), ".pdf")
         self.assertEqual(self.unified_parser.get_file_extension("test.docx"), ".docx")
         self.assertEqual(self.unified_parser.get_file_extension("test.csv"), ".csv")
+        self.assertEqual(self.unified_parser.get_file_extension("test.txt"), ".txt")
         self.assertEqual(self.unified_parser.get_file_extension("test.PDF"), ".pdf")
     
     def test_unified_parser_supported_formats(self):
@@ -84,10 +85,11 @@ class TestAllParsers(unittest.TestCase):
         self.assertIn(".pdf", formats)
         self.assertIn(".docx", formats)
         self.assertIn(".csv", formats)
+        self.assertIn(".txt", formats)
     
     def test_unified_parser_unsupported_format(self):
         """Test unified parser with unsupported format."""
-        result = self.unified_parser.parse("test.txt")
+        result = self.unified_parser.parse("test.xlsx")
         self.assertIn("error", result)
         self.assertEqual(result["content"], [])
         self.assertIn("Unsupported file format", result["error"])
