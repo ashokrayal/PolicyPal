@@ -27,10 +27,12 @@ from src.retrieval.hybrid_retriever import HybridRetriever
 from src.conversation.conversational_chain import ConversationalChain
 from ui.components.chat_interface import display_chat_interface
 from src.ingestion.text_chunker import TextChunker
-from src.embeddings.cache_manager import EmbeddingCache, CachedEmbeddingGenerator
+from src.embeddings.cache_manager import EmbeddingCache
 from src.embeddings.optimizer import EmbeddingOptimizer
 from src.embeddings.performance_monitor import PerformanceMonitor
 from src.retrieval.text_preprocessor import RetrievalTextPreprocessor
+from src.safety.safety_manager import safety_manager
+from src.conversation.prompt_templates import prompt_manager
 
 # Set up logging
 # Remove any existing handlers
@@ -268,72 +270,91 @@ def initialize_components():
     """Initialize all PolicyPal components."""
     try:
         logging.info("Initializing components...")
+        
         # Initialize performance monitor
+        from src.embeddings.performance_monitor import PerformanceMonitor
         performance_monitor = PerformanceMonitor()
         logging.info("PerformanceMonitor initialized.")
-
+        
         # Initialize text preprocessor
+        from src.retrieval.text_preprocessor import RetrievalTextPreprocessor
         text_preprocessor = RetrievalTextPreprocessor()
         logging.info("RetrievalTextPreprocessor initialized.")
-
+        
         # Initialize embedding generator
-        base_embedding_generator = EmbeddingGenerator()
-        # Initialize cache manager
+        from src.embeddings.embedding_generator import EmbeddingGenerator
+        embedding_generator = EmbeddingGenerator()
+        
+        # Initialize embedding cache
+        from src.embeddings.cache_manager import EmbeddingCache
         embedding_cache = EmbeddingCache()
-        cached_embedding_generator = CachedEmbeddingGenerator(base_embedding_generator, embedding_cache)
-        # Initialize optimizer (wraps cached generator)
+        
+        # Initialize embedding optimizer
+        from src.embeddings.optimizer import EmbeddingOptimizer
         embedding_optimizer = EmbeddingOptimizer(
-            embedding_generator=cached_embedding_generator,
+            embedding_generator=embedding_generator,
             batch_size=8,
             max_workers=2,
             use_cache=True
         )
         logging.info("EmbeddingOptimizer (with cache) initialized.")
-
-        # Initialize vector store with correct dimension (384 for all-MiniLM-L6-v2)
+        
+        # Initialize vector store
+        from src.embeddings.vector_store import FAISSVectorStore
         vector_store = FAISSVectorStore(dim=384)
         logging.info("FAISSVectorStore initialized with dim=384.")
         
-        # Initialize BM25 retriever with empty initial data
+        # Initialize BM25 retriever
+        from src.retrieval.bm25_retriever import BM25Retriever
         bm25_retriever = BM25Retriever()
         logging.info("BM25Retriever initialized.")
         
         # Initialize hybrid retriever
+        from src.retrieval.hybrid_retriever import HybridRetriever
         hybrid_retriever = HybridRetriever(
             faiss_retriever=vector_store,
             bm25_retriever=bm25_retriever
         )
         logging.info("HybridRetriever initialized.")
         
+        # Initialize safety manager
+        from src.safety.safety_manager import safety_manager
+        logging.info("SafetyManager initialized.")
+        
+        # Initialize prompt manager
+        from src.conversation.prompt_templates import prompt_manager
+        logging.info("PromptManager initialized.")
+        
         # Initialize mock LLM
-        llm = MockLLM()
+        mock_llm = MockLLM()
         logging.info("MockLLM initialized.")
         
-        # Initialize conversational chain
+        # Initialize conversational chain with safety
+        from src.conversation.conversational_chain import ConversationalChain
         conversational_chain = ConversationalChain(
             hybrid_retriever=hybrid_retriever,
-            embedding_generator=embedding_optimizer,  # Use optimizer for all embeddings
-            llm=llm,
-            max_history=20
+            embedding_generator=embedding_optimizer,
+            llm=mock_llm,
+            enable_safety=True
         )
         logging.info("ConversationalChain initialized.")
         
         return {
-            "embedding_generator": embedding_optimizer,
+            "embedding_generator": embedding_generator,
+            "embedding_optimizer": embedding_optimizer,
             "vector_store": vector_store,
             "bm25_retriever": bm25_retriever,
             "hybrid_retriever": hybrid_retriever,
             "conversational_chain": conversational_chain,
             "performance_monitor": performance_monitor,
             "text_preprocessor": text_preprocessor,
-            "embedding_cache": embedding_cache
+            "embedding_cache": embedding_cache,
+            "safety_manager": safety_manager,
+            "prompt_manager": prompt_manager
         }
-    
+        
     except Exception as e:
-        tb = traceback.format_exc()
-        logging.error(f"Error initializing components: {e}\n{tb}")
-        st.error(f"Error initializing components: {e}")
-        st.code(tb, language="python")
+        logging.error(f"Error initializing components: {str(e)}")
         return None
 
 
@@ -443,12 +464,12 @@ def setup_demo_data(components):
 
 
 def display_monitoring_dashboard(components):
-    """Display monitoring and testing dashboard."""
-    st.sidebar.markdown("## 🔍 Monitoring & Testing")
+    """Display monitoring dashboard in sidebar."""
+    st.sidebar.title("🔍 Monitoring Dashboard")
     
-    # Create tabs for different monitoring sections
-    tab1, tab2, tab3, tab4, tab5 = st.sidebar.tabs([
-        "📊 Performance", "💾 Cache", "🔍 Search", "🏥 Health", "⚡ Benchmarks"
+    # Create tabs for different monitoring areas
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.sidebar.tabs([
+        "Performance", "Cache", "Search Quality", "Safety", "System Health", "Benchmarks"
     ])
     
     with tab1:
@@ -461,9 +482,12 @@ def display_monitoring_dashboard(components):
         display_search_quality_metrics(components)
     
     with tab4:
-        display_system_health(components)
+        display_safety_metrics(components)
     
     with tab5:
+        display_system_health(components)
+    
+    with tab6:
         display_benchmarking_tools(components)
 
 
@@ -704,6 +728,104 @@ def display_benchmarking_tools(components):
                 st.write("**Parallel processing:** Enabled")
             else:
                 st.write("**Parallel processing:** Disabled")
+
+
+def display_safety_metrics(components):
+    """Display safety metrics and configuration."""
+    st.subheader("Safety Metrics")
+    
+    # Get safety manager
+    safety_manager = components.get('safety_manager')
+    if not safety_manager:
+        st.warning("Safety manager not available")
+        return
+    
+    # Get safety statistics
+    safety_stats = safety_manager.get_safety_stats()
+    
+    # Display safety configuration
+    st.markdown("#### Safety Configuration")
+    config = safety_stats.get("safety_config", {})
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.metric("Content Filtering", "Enabled" if config.get("enable_content_filtering") else "Disabled")
+        st.metric("Moderation", "Enabled" if config.get("enable_moderation") else "Disabled")
+    
+    with col2:
+        st.metric("Redaction", "Enabled" if config.get("enable_redaction") else "Disabled")
+        st.metric("Strict Mode", "Enabled" if config.get("strict_mode") else "Disabled")
+    
+    # Display content filter stats
+    st.markdown("#### Content Filter Statistics")
+    filter_stats = safety_stats.get("content_filter_stats", {})
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Rules", filter_stats.get("total_rules", 0))
+    with col2:
+        st.metric("Enabled Rules", filter_stats.get("enabled_rules", 0))
+    with col3:
+        st.metric("Disabled Rules", filter_stats.get("disabled_rules", 0))
+    
+    # Display moderation stats
+    st.markdown("#### Moderation Statistics")
+    moderation_stats = safety_stats.get("moderation_stats", {})
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Moderations", moderation_stats.get("total_moderations", 0))
+    with col2:
+        st.metric("Avg Risk Score", f"{moderation_stats.get('avg_risk_score', 0):.2f}")
+    with col3:
+        st.metric("Blocked Patterns", moderation_stats.get("blocked_patterns_count", 0))
+    
+    # Display redaction stats
+    st.markdown("#### Redaction Statistics")
+    redaction_stats = safety_stats.get("redaction_stats", {})
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total Rules", redaction_stats.get("total_rules", 0))
+    with col2:
+        st.metric("Enabled Rules", redaction_stats.get("enabled_rules", 0))
+    with col3:
+        st.metric("Data Types", len(redaction_stats.get("data_types_covered", [])))
+    
+    # Safety test interface
+    st.markdown("#### Safety Test")
+    test_content = st.text_area("Test content for safety analysis:", 
+                               placeholder="Enter content to test for safety issues...")
+    
+    if st.button("Test Safety"):
+        if test_content:
+            scan_results = safety_manager.scan_content(test_content)
+            
+            st.markdown("##### Scan Results")
+            
+            # Content filter results
+            filter_result = scan_results.get("content_filter_scan")
+            if filter_result:
+                st.write(f"**Content Filter:** {filter_result.risk_level.value} risk")
+                if filter_result.flagged_patterns:
+                    st.write(f"**Flagged Patterns:** {len(filter_result.flagged_patterns)}")
+            
+            # Redaction results
+            redaction_scan = scan_results.get("redaction_scan")
+            if redaction_scan:
+                st.write(f"**Sensitive Data Found:** {redaction_scan.get('sensitive_data_found', False)}")
+                if redaction_scan.get("sensitive_data_found"):
+                    st.write(f"**Data Types:** {', '.join(redaction_scan.get('data_types', []))}")
+                    st.write(f"**Risk Level:** {redaction_scan.get('risk_level', 'unknown')}")
+            
+            # Moderation results
+            moderation_scan = scan_results.get("moderation_scan")
+            if moderation_scan:
+                st.write(f"**Moderation Action:** {moderation_scan.action.value}")
+                st.write(f"**Risk Score:** {moderation_scan.risk_score:.2f}")
+                st.write(f"**Approved:** {moderation_scan.is_approved}")
+        else:
+            st.warning("Please enter content to test")
 
 
 def main():

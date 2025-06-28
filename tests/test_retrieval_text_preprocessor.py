@@ -48,13 +48,14 @@ class TestRetrievalTextPreprocessor(unittest.TestCase):
         processed = self.preprocessor.preprocess_text(text)
         
         # Should remove some stop words and be lowercase
-        self.assertNotIn("this", processed)
-        self.assertNotIn("is", processed)
-        self.assertNotIn("a", processed)  # 'a' is in stop words list and should be removed
-        self.assertIn("test", processed)
-        self.assertIn("document", processed)
-        self.assertIn("employee", processed)
-        self.assertIn("policies", processed)
+        processed_words = processed.split()
+        self.assertNotIn("this", processed_words)
+        self.assertNotIn("is", processed_words)
+        self.assertNotIn("a", processed_words)  # 'a' is in stop words list and should be removed
+        self.assertIn("test", processed_words)
+        self.assertIn("document", processed_words)
+        self.assertIn("employee", processed_words)
+        self.assertIn("policies", processed_words)
         
         # Check the actual result matches expected
         expected = "test document about employee policies"
@@ -177,12 +178,13 @@ class TestRetrievalTextPreprocessor(unittest.TestCase):
         processed = short_preprocessor.preprocess_text(text)
         
         # Should filter out very short words
-        self.assertNotIn("a", processed)
-        self.assertNotIn("b", processed)
-        self.assertNotIn("c", processed)  # 'c' should be filtered out
+        processed_words = processed.split()
+        self.assertNotIn("a", processed_words)
+        self.assertNotIn("b", processed_words)
+        self.assertNotIn("c", processed_words)  # 'c' should be filtered out
         # Note: 'very' and 'document' should be kept, 'longword' might be filtered
-        self.assertIn("very", processed)  # length 4, should be kept
-        self.assertIn("document", processed)  # length 8, should be kept
+        self.assertIn("very", processed_words)  # length 4, should be kept
+        self.assertIn("document", processed_words)  # length 8, should be kept
         
         # Check the actual result matches expected
         expected = "very longword document"
